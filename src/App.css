@@ -73,33 +73,75 @@ svg {
   body {
     padding: 2rem;
   }
-  
-  button: {
-    alignItems: 'center';
-    justifyContent: 'center';
-    paddingVertical: 12;
-    paddingHorizontal: 32;
-    borderRadius: 4;
-    elevation: 3;
-    backgroundColor: 'black';
+
+  .profilepic {
+    width: 50px;
+    height: 50px;
+    border-radius: 65%;
+    overflow: hidden;
+    margin-top: -6px;
   }
 
-  text: {
-    fontSize: 16;
-    lineHeight: 21;
-    fontWeight: 'bold';
-    letterSpacing: 0.25;
-    color: 'white';
+  .sidenav {
+    height: 100%; /* Full-height: remove this if you want "auto" height */
+    width: 70px; /* Set the width of the sidebar */
+    position: fixed; /* Fixed Sidebar (stay in place on scroll) */
+    z-index: 1; /* Stay on top */
+    top: 0; /* Stay at the top */
+    left: 0;
+    background-color: #111; /* Black */
+    overflow-x: hidden; /* Disable horizontal scroll */
+    padding-top: 20px;
   }
   
-  img {
-    width: 90px;
+  /* The navigation menu links */
+  .sidenav a {
+    padding: 6px 6px 6px 16px;
+    text-decoration: none;
+    font-size: 15px;
+    color: #818181;
+    display: block;
+  }
+  
+  /* When you mouse over the navigation links, change their color */
+  .sidenav a:hover {
+    color: #f1f1f1;
   }
 
-  .LogoutButton {
-    width: 55px;
+  .PlayButton{
+    width: 60px;
     height: 25px;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    background: transparent;
+    border: 1px solid #91C9FF;
+    outline: none;
+    transition: 1s ease-in-out;
     position: absolute;
-    right: 2%;
-    top: 5%;
+  }
+
+  .StatusButton{
+    width: 100px;
+    height: 35px;
+    left: 50%;
+    top: 40%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    background: transparent;
+    border: 1px solid #91C9FF;
+    outline: none;
+    transition: 1s ease-in-out;
+    position: absolute;
+  }
+
+  .Home{
+    left: 30%;
   }

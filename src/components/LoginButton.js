@@ -9,7 +9,7 @@ const LoginButton = () => {
 
             <>
             <div class = "Welcome">
-                <h2>Καλωσήρθατε στο IoT-Manager</h2>
+                <h2>Καλωσήρθατε στον IoT-Manager</h2>
             </div>
             <div class="container">
                     <div class="center">
