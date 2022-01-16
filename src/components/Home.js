@@ -19,8 +19,9 @@ const Home = () => {
         isAuthenticated && (
             <div>
                 <div class="Home">
-                <button type="button" class="PlayButton" onclick="Ping()">Ping</button>
-                <button type="button" class="StatusButton" onclick="CheckStatus()">Check Player Status</button>
+                <button type="button" class="PlayButton" onclick="Play()">Play</button>
+                <button type="button" class="SkipButton" onclick="Skip()">&#62;&#62;</button>
+                <button type="button" class="PreviousButton" onclick="Previous()">&#60;&#60;</button>
                 </div>
             </div>
         )

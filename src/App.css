@@ -112,7 +112,7 @@ svg {
     width: 60px;
     height: 25px;
     left: 50%;
-    top: 50%;
+    top: 40%;
     transform: translate(-50%, -50%);
     display: flex;
     justify-content: center;
@@ -125,10 +125,27 @@ svg {
     position: absolute;
   }
 
-  .StatusButton{
-    width: 100px;
-    height: 35px;
-    left: 50%;
+  .SkipButton{
+    width: 40px;
+    height: 25px;
+    left: 55%;
+    top: 40%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    background: transparent;
+    border: 1px solid #91C9FF;
+    outline: none;
+    transition: 1s ease-in-out;
+    position: absolute;
+  }
+
+  .PreviousButton{
+    width: 40px;
+    height: 25px;
+    left: 45%;
     top: 40%;
     transform: translate(-50%, -50%);
     display: flex;
