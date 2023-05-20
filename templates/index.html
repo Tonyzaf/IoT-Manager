@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/index.css') }}"
+    />
+    <title>SSH Command Execution</title>
+  </head>
+  <body>
+    {% if session %}
+    <p><a class="loginText" href="/logout">Logout</a></p>
+    <h1>SSH Command Execution</h1>
+    <h1>Welcome {{session.userinfo.name}}!</h1>
+    <h1>Please connect your device to port {{port}}</h1>
+    <p>Click the button to execute an SSH command</p>
+    <form action="/ssh_command" method="post">
+      <input type="submit" value="Execute Command" />
+    </form>
+    <pre>{{ result }}</pre>
+    {% else %}
+    <div class="pageContainer">
+      <div class="loginContainer">
+        <h1 class="loginText">Welcome to IoT-Manager</h1>
+        <h2>
+          IoT-Manager is a project developed as a Master's thesis for the
+          Computer Engineering and Informatics Department of the University of
+          Patras
+        </h2>
+        <h2>
+          With IoT-Manager, the user can register IoT Devices running linux to
+          his account and directly control them through the web application
+        </h2>
+        <p><a class="buttonText" href="/login">Login</a></p>
+      </div>
+    </div>
+    {% endif %}
+  </body>
+</html>

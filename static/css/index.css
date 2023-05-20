@@ -1,0 +1,42 @@
+body {
+  background-color: navy;
+  flex-direction: column;
+  display: flex;
+  flex: 1;
+}
+
+h1,
+p,
+pre {
+  color: white;
+}
+
+h2 {
+  color: white;
+  width: 50%;
+  text-align: center;
+}
+
+.pageContainer {
+  display: flex;
+  flex: 1;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.loginContainer {
+  flex-direction: column;
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+}
+
+.loginText {
+  color: white;
+}
+
+.buttonText {
+  color: white;
+}
