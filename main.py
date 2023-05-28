@@ -104,7 +104,7 @@ def ssh_command():
 def terminal_command():
     string = 'The Result is: '
     result = subprocess.check_output(['who'])  # replace with your command
-    return render_template('index.html', result=result, session=session.get('user'))
+    return render_template('index.html', result=result, session=session)
 
 
 if __name__ == "__main__":
