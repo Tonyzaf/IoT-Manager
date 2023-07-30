@@ -21,9 +21,20 @@ app = Flask(__name__)
 
 app.secret_key = env.get("APP_SECRET_KEY")
 
-port = random.randint(0, 10000)
+port = 0
+
+# # Declaration of port randomizer
+excluded_numbers = {22, 80}
+
+
+def generate_random_number():
+    # Create a set of available numbers by subtracting excluded_numbers from all possible numbers
+    available_numbers = set(range(1, 10000)) - excluded_numbers
+    # Choose one random number from the available numbers
+    return random.sample(available_numbers, 1)[0]
 
 # Connection to Auth0
+
 
 oauth = OAuth(app)
 
@@ -42,6 +53,8 @@ oauth.register(
 
 @app.route("/")
 def home():
+    global port
+    port = generate_random_number()
     return render_template("index.html", session=session.get('user'), port=port)
 
 # Login Page (Redirect to Auth0)
@@ -87,14 +100,18 @@ def logout():
 def ssh_command():
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    ssh.connect('localhost', username='antonis',
-                password='Ml4ke14x!', port=port)
+    try:
+        ssh.connect('localhost', username='antonis',
+                    password='Ml4ke14x!', port=port)
+    except:
+        return 'request  failed'
     command = 'ls -l'
     stdin, stdout, stderr = ssh.exec_command(command)
     stdout.channel.set_combine_stderr(True)
     output = stdout.readlines()
     ssh.close()
-    return output
+    if (output):
+        return 'success'
     # render_template("index.html", session=session.get('user'))
 
 # Demo page to execute terminal Command
