@@ -109,8 +109,8 @@ def verify_device():
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     try:
-        ssh.connect('localhost', username='antonis',
-                    password='Ml4ke14x!', port=port)
+        ssh.connect(env.get("SERVER_HOST"), username=env.get("SERVER_USER"),
+                    password=env.get("SERVER_PASS"), port=port)
     except:
         result = False
         return render_template("verifyDevice.html", result=result)
