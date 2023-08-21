@@ -93,35 +93,36 @@ def logout():
         )
     )
 
-# Demo page to execute SSH command
+# Add Device Landing Screen
 
 
-@app.route('/ssh_command', methods=['POST'])
-def ssh_command():
+@app.route('/add_device')
+def add_device():
+    return render_template("addDevice.html", session=session.get('user'))
+
+# Verify The Device Was Connected And Add DB Entry
+
+
+@app.route('/verify_device', methods=['POST'])
+def verify_device():
+    result = False
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     try:
         ssh.connect('localhost', username='antonis',
                     password='Ml4ke14x!', port=port)
     except:
-        return 'request  failed'
+        result = False
+        return render_template("verifyDevice.html", result=result)
     command = 'ls -l'
     stdin, stdout, stderr = ssh.exec_command(command)
     stdout.channel.set_combine_stderr(True)
     output = stdout.readlines()
     ssh.close()
-    if (output):
-        return 'success'
-    # render_template("index.html", session=session.get('user'))
+    if output:
+        result = True
 
-# Demo page to execute terminal Command
-
-
-@app.route('/terminal_command', methods=['POST'])
-def terminal_command():
-    string = 'The Result is: '
-    result = subprocess.check_output(['who'])  # replace with your command
-    return render_template('index.html', result=result, session=session)
+    return render_template("verifyDevice.html", result=result)
 
 
 if __name__ == "__main__":

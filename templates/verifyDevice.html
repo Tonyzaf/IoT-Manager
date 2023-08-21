@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <!-- {% if session == false %}
+  <script type="text/javascript" src="../js/RedirectToLogin.js"></script>
+  {%endif%} -->
+  <head>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="../static/css/verifyDevice.css"
+    />
+    <title>Add New Device</title>
+  </head>
+  <body class="pageContainer">
+    <div class="textContainer">
+      {% if result %}
+      <p class="descriptionText">
+        The device has been succesfully added. You can go ahead and close this
+        window.
+      </p>
+      {% else %}
+      <p class="descriptionText">
+        The device has not been added. Please try again.
+      </p>
+      {%endif%}
+    </div>
+  </body>
+</html>

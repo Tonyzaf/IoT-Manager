@@ -29,6 +29,13 @@
         <div class="navbar-nav">
           {% if session %}
           <a class="nav-item nav-link" id="home" href="/">Home</a>
+          <a
+            class="nav-item nav-link"
+            id="addDevice"
+            target="popup"
+            onclick="window.open('/add_device','name','width=800,height=600')"
+            >Add Device
+          </a>
           <a class="nav-item nav-link" id="logout" href="/logout">Logout</a>
           {% else %}
           <a class="nav-item nav-link" id="login" href="/login">Login</a>
@@ -42,7 +49,9 @@
       <h1>SSH Command Execution</h1>
       <h1>Welcome {{session.userinfo.name}}!</h1>
       <h1>UserID: {{session.userinfo.sub}}</h1>
-      <h1 style="margin-top: 30px;">Please connect your device to port {{port}}</h1>
+      <h1 style="margin-top: 30px">
+        Please connect your device to port {{port}}
+      </h1>
       <p>Click the button to execute an SSH command</p>
       <form action="/ssh_command" method="post">
         <input type="submit" value="Execute Command" />
@@ -60,7 +69,7 @@
         </h2>
         <h2>
           With IoT-Manager, the user can register IoT Devices running linux to
-          his account and directly control them through the web application
+          his account and remotely control them through the web application
         </h2>
       </div>
     </div>
