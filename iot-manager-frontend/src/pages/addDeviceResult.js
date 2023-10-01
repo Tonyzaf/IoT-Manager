@@ -1,10 +1,8 @@
 import React, { useState } from "react";
-import { useAuth0 } from "@auth0/auth0-react";
-import NavBar from "@/components/navbar/navbar";
 
-import "../styles/home.css";
+import "../styles/addDeviceResult.css";
 
-function HomePage() {
+const addDeviceResult = ({ success }) => {
   const [isButtonHovered, setIsButtonHovered] = useState(false);
   const [result, setResult] = useState();
 
@@ -18,13 +16,15 @@ function HomePage() {
 
   return (
     <div className="App">
-      <NavBar setResult={setResult} /> {/* Render the NavBar component */}
       <header className="App-header">
-        <h1>Welcome to IoT Manager</h1>
-        <h1>{result}</h1>
+        <h1>
+          {success
+            ? "Your device was successfully paired"
+            : "An error occured. Please try again"}
+        </h1>
       </header>
     </div>
   );
-}
+};
 
-export default HomePage;
+export default addDeviceResult;

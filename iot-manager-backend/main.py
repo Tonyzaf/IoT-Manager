@@ -9,10 +9,10 @@ import random
 from flask import Flask, redirect, render_template, session, url_for
 import logging
 from flask import Flask
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
-CORS(app, origins="*") 
+app.config['CORS_HEADERS'] = 'Content-Type'
 
 port = 0
 
@@ -27,16 +27,17 @@ def generate_random_number():
     # Choose one random number from the available numbers
     port = random.sample(available_numbers, 1)[0]
 
-@app.route('/verify_device', methods=['GET','OPTIONS'])
-def verify_device():
+@app.route('/verify_device/<username>/<password>', methods=['GET','OPTIONS'])
+@cross_origin()
+def verify_device(username,password):
     try:
         generate_random_number()
         result = False
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         try:
-            ssh.connect(env.get("SERVER_HOST"), username=env.get("SERVER_USER"),
-                        password=env.get("SERVER_PASS"), port=port)
+            ssh.connect('localhost', username=username,
+                        password=password)
         except Exception as e:
             logging.error("SSH connection error: {str(e)}")
             result = False
@@ -53,5 +54,5 @@ def verify_device():
         logging.error(f"An error occurred: {str(e)}")
         return "An error occurred", 500  # Return a 500 Internal Server Error status
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=env.get("PORT", 3000))
+# if __name__ == "__main__":
+#     app.run(host="0.0.0.0", port=env.get("PORT", 3000))

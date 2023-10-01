@@ -1,0 +1,95 @@
+.App {
+  text-align: center;
+  width: 100%; /* Make the component extend to the edge of the screen */
+}
+
+.App-header {
+  background-color: #f0f0f0;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+h1 {
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+h2 {
+  text-align: center;
+}
+
+p {
+  font-size: 1.2rem;
+  margin-bottom: 20px;
+}
+
+label {
+  margin-right: 5px;
+}
+
+input {
+  border-radius: 6px;
+  border-width: 1px;
+  border-color: #323232;
+  width: 200px;
+  height: 30px;
+}
+
+.normal-button {
+  position: absolute;
+  right: 10px;
+  background-color: #007bff;
+  color: white;
+  font-size: 1.2rem;
+  padding: 10px 20px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.normal-button:hover {
+  background-color: #0056b3;
+}
+
+.highlighted-button {
+  position: absolute;
+  right: 10px;
+  background-color: #ff9900;
+  color: white;
+  font-size: 1.2rem;
+  margin-top: 10px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.highlighted-button:hover {
+  background-color: #e68a00;
+}
+
+.sshCommand {
+  background-color: grey;
+  border-radius: 6px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+.formContainer {
+  align-content: center;
+}
+
+.usernameForm {
+  margin-bottom: 10px;
+}
+
+.buttonRow {
+  width: 100%;
+  justify-content: flex-end;
+  flex-direction: row;
+  flex: 1;
+}
