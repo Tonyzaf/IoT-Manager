@@ -1,4 +1,4 @@
-import React, { Component, useState } from "react";
+import React, { Component, useEffect, useState } from "react";
 import axios from "axios";
 import Router from "next/router";
 
@@ -10,15 +10,30 @@ const addDeviceLanding = () => {
   const [success, setSuccess] = useState(false);
   const [isButtonHovered, setIsButtonHovered] = useState(false);
 
+  let headers = new Headers();
+
+  headers.append("Content-Type", "application/json");
+  headers.append("Accept", "application/json");
+
+  const getCredentials = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:5000/get_connection_credentials/`
+      );
+      console.log(response.data);
+    } catch (error) {
+      // Handle errors
+      console.error(error);
+    }
+  };
+
   const CallEndpoint = async () => {
     console.log("called");
     try {
-      const response = await axios.get(
+      const response = await axios.post(
         `http://localhost:5000/verify_device/${username}/${password}`
       );
       // Handle the response here
-      console.log(response.data);
-      setSuccess(response.data);
     } catch (error) {
       // Handle errors
       console.error(error);
@@ -50,8 +65,12 @@ const addDeviceLanding = () => {
     // Reset the form after submission
     setUsername("");
     setPassword("");
-    Router.push("/addDeviceResult", { success: success });
+    //Router.push("/addDeviceResult", { success: success });
   };
+
+  useEffect(() => {
+    getCredentials();
+  }, []);
 
   return (
     <div>

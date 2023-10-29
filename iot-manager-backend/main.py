@@ -1,18 +1,14 @@
-from flask import Flask, render_template, request
-import os
+from flask import Flask, request
 import paramiko
 import subprocess
-import json
-from os import environ as env
-from urllib.parse import quote_plus, urlencode
 import random
-from flask import Flask, redirect, render_template, session, url_for
+from flask import Flask
 import logging
 from flask import Flask
 from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
-app.config['CORS_HEADERS'] = 'Content-Type'
+CORS(app)
 
 port = 0
 
@@ -28,10 +24,8 @@ def generate_random_number():
     port = random.sample(available_numbers, 1)[0]
 
 @app.route('/verify_device/<username>/<password>', methods=['GET','OPTIONS'])
-@cross_origin()
 def verify_device(username,password):
     try:
-        generate_random_number()
         result = False
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -43,13 +37,26 @@ def verify_device(username,password):
             result = False
             return str(result)
         command = 'ls -l'
-        stdin, stdout, stderr = ssh.exec_command(command)
+        stdout = ssh.exec_command(command)
         stdout.channel.set_combine_stderr(True)
         output = stdout.readlines()
         ssh.close()
         if output:
             result = True
         return str(result)  # Convert the boolean to a string before returning
+    except Exception as e:
+        logging.error(f"An error occurred: {str(e)}")
+        return "An error occurred", 500  # Return a 500 Internal Server Error status
+
+@app.route('/get_connection_credentials', methods=['GET'])
+@cross_origin(origin="*")
+def get_connection_credentials():
+    try:
+        generate_random_number()
+        ipaddress = subprocess.run(["ipconfig", "getifaddr", "en0"], capture_output=True).stdout.decode('utf-8')
+        username = subprocess.run(["id", "-un"], capture_output=True).stdout.decode('utf-8')
+        connectionCommand = 'ssh -R %d:localhost:22 %s@%s' % (port,username,ipaddress)
+        return connectionCommand 
     except Exception as e:
         logging.error(f"An error occurred: {str(e)}")
         return "An error occurred", 500  # Return a 500 Internal Server Error status
