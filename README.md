@@ -14,7 +14,7 @@
 	<li>Download and install NodeJS from the NodeJS website: https://docs.npmjs.com/downloading-and-installing-node-js-and-npm</li>
 	<li>CD into the `iot-manager-frontend`</li>
 	<li>Run `npm i` to download and install all the dependencies needed.</li>
-	<li>Run `npm run dev` to start the Node server.</li>
+	<li>Run `npx next dev` to start the Node server.</li>
 	<li>The website is now running on `localhost:3000`</li>
 </ul>
 
