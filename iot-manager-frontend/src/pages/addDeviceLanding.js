@@ -7,6 +7,7 @@ import "../styles/addDeviceLanding.css";
 const addDeviceLanding = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [credentials, setCredentials] = useState("");
   const [success, setSuccess] = useState(false);
   const [isButtonHovered, setIsButtonHovered] = useState(false);
 
@@ -18,9 +19,10 @@ const addDeviceLanding = () => {
   const getCredentials = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:5000/get_connection_credentials/`
+        `http://localhost:5000/get_connection_credentials`
       );
       console.log(response.data);
+      setCredentials(response.data);
     } catch (error) {
       // Handle errors
       console.error(error);
@@ -30,10 +32,17 @@ const addDeviceLanding = () => {
   const CallEndpoint = async () => {
     console.log("called");
     try {
-      const response = await axios.post(
-        `http://localhost:5000/verify_device/${username}/${password}`
-      );
+      const response = await axios.post(`http://localhost:5000/verify_device`, {
+        username: username,
+        password: password,
+      });
+      console.log("response", response);
       // Handle the response here
+      if (response.data === "True") {
+        return true;
+      } else {
+        return false;
+      }
     } catch (error) {
       // Handle errors
       console.error(error);
@@ -56,21 +65,28 @@ const addDeviceLanding = () => {
     setPassword(e.target.value);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     // You can perform your login logic here with this.state.username and this.state.password
     // For example, you can make an API request to authenticate the user
     console.log("Username: ", username);
     console.log("Password: ", password);
+    const result = await CallEndpoint();
+    console.log(result);
     // Reset the form after submission
     setUsername("");
     setPassword("");
-    //Router.push("/addDeviceResult", { success: success });
+    Router.push({
+      pathname: "/addDeviceResult",
+      query: { result: result },
+    });
   };
 
   useEffect(() => {
     getCredentials();
   }, []);
+
+  if (credentials == null) return;
 
   return (
     <div>
@@ -80,9 +96,7 @@ const addDeviceLanding = () => {
         </header>
       </div>
       <h2>Please run the following command on the device you want to pair.</h2>
-      <h2 className="sshCommand">
-        ssh -R 1234:localhost:22 antonis@192.168.1.15
-      </h2>
+      <h2 className="sshCommand">{credentials}</h2>
       <h2>
         After that, please enter the username and password to your local account
         and press next to establish a connection.

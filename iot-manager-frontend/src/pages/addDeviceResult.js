@@ -1,24 +1,19 @@
 import React, { useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 import "../styles/addDeviceResult.css";
 
-const addDeviceResult = ({ success }) => {
-  const [isButtonHovered, setIsButtonHovered] = useState(false);
-  const [result, setResult] = useState();
+const addDeviceResult = () => {
+  const searchParams = useSearchParams();
 
-  const handleButtonHover = () => {
-    setIsButtonHovered(true);
-  };
-
-  const handleButtonLeave = () => {
-    setIsButtonHovered(false);
-  };
+  const success = searchParams.get("result");
+  console.log("s", success);
 
   return (
     <div className="App">
       <header className="App-header">
         <h1>
-          {success
+          {success === "true"
             ? "Your device was successfully paired"
             : "An error occured. Please try again"}
         </h1>
