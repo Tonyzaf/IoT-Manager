@@ -1,0 +1,10 @@
+.Player-Controls {
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.Play-Pause-Button {
+  padding-right: 150px;
+  margin-left: 150px;
+}

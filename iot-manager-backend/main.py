@@ -1,4 +1,5 @@
 from flask import Flask, request
+import os
 import paramiko
 import subprocess
 import mysql.connector
@@ -7,9 +8,14 @@ from flask import Flask
 import logging
 from flask import Flask
 from flask_cors import CORS, cross_origin
+from cryptography.fernet import Fernet
+from dotenv import load_dotenv
 
 app = Flask(__name__)
 CORS(app)
+
+load_dotenv()
+encrypt_key = os.getenv("encrypt_key")
 
 port = 0
 
@@ -67,6 +73,15 @@ def get_connection_credentials():
     except Exception as e:
         logging.error(f"An error occurred: {str(e)}")
         return "An error occurred", 500  # Return a 500 Internal Server Error status
+
+
+@app.route('/generate_key', methods=['GET'])
+@cross_origin(origin="*")
+def generate_key():
+    key = Fernet.generate_key()
+    print(key)
+    print(encrypt_key)
+    return key
 
 # if __name__ == "__main__":
 #     app.run(host="0.0.0.0", port=env.get("PORT", 3000))
