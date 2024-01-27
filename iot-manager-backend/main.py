@@ -1,8 +1,9 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
 import os
 import paramiko
 import subprocess
 import mysql.connector
+from mysql.connector import Error
 import random
 from flask import Flask
 import logging
@@ -16,11 +17,28 @@ CORS(app)
 
 load_dotenv()
 encrypt_key = os.getenv("encrypt_key")
+cipher_suite = Fernet(encrypt_key)
 
 port = 0
 
-# # Declaration of port randomizer
+# Declaration of port randomizer
 excluded_numbers = {22, 80}
+
+# Configure Database
+db_config = {'host': 'localhost', 'database': 'IOT_MANAGER',
+             'user': 'root', 'password': 'Ml4ke14x!'}
+
+
+def encrypt_string(plaintext):
+    # Encrypt the string
+    ciphertext = cipher_suite.encrypt(plaintext.encode())
+    return ciphertext.decode()
+
+
+def decrypt_string(ciphertext):
+    # Decrypt the string
+    plaintext = cipher_suite.decrypt(ciphertext.encode())
+    return plaintext.decode()
 
 
 def generate_random_number():
@@ -30,9 +48,11 @@ def generate_random_number():
     # Choose one random number from the available numbers
     port = random.sample(available_numbers, 1)[0]
 
+### VERIFY DEVICE CREDENTIALS ###
 
-@app.route('/verify_device', methods=['POST'])
-def verify_device():
+
+@app.route('/verifyDevice', methods=['POST'])
+def verifyDevice():
     global port
     content_type = request.headers.get('Content-Type')
     if (content_type == 'application/json'):
@@ -45,7 +65,7 @@ def verify_device():
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         username, password = json.values()
         try:
-            print('test', username)
+            print('Username', username)
             ssh.connect('localhost', username=username,
                         password=password, port=port)
         except (paramiko.AuthenticationException, paramiko.SSHException) as message:
@@ -56,6 +76,8 @@ def verify_device():
     except Exception as e:
         logging.error(f"An error occurred: {str(e)}")
         return "An error occurred", 500  # Return a 500 Internal Server Error status
+
+### FETCH CONNECTION CREDENTIALS TO DISPLAY ###
 
 
 @app.route('/get_connection_credentials', methods=['GET'])
@@ -74,6 +96,8 @@ def get_connection_credentials():
         logging.error(f"An error occurred: {str(e)}")
         return "An error occurred", 500  # Return a 500 Internal Server Error status
 
+### DEV: FOR INTERNAL USE ONLY ###
+
 
 @app.route('/generate_key', methods=['GET'])
 @cross_origin(origin="*")
@@ -83,5 +107,95 @@ def generate_key():
     print(encrypt_key)
     return key
 
-# if __name__ == "__main__":
-#     app.run(host="0.0.0.0", port=env.get("PORT", 3000))
+### FETCH ALL DEVICES ON THE DB ###
+
+
+@app.route('/getDevices', methods=['GET'])
+@cross_origin(origin="*")
+def getDevices():
+    try:
+        connection = mysql.connector.connect(**db_config)
+        if connection.is_connected():
+            cursor = connection.cursor()
+            cursor.execute("SELECT * FROM devices")
+            entries = cursor.fetchall()
+            for entry in entries:
+                password = entry[5]  # Get password from entry
+                print("Password:", decrypt_string(password))
+
+    except Error as e:
+        print("Error while connecting to MySQL", e)
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+            print("MySQL connection is closed")
+            return (entries)
+
+### GET USER DEVICES ###
+
+
+@app.route('/getUserDevices', methods=['GET'])
+@cross_origin(origin="*")
+def getUserDevices():
+    userId = request.args.get('userId')
+    print(userId)
+    devices = []
+    try:
+        connection = mysql.connector.connect(**db_config)
+        if connection.is_connected():
+            cursor = connection.cursor()
+            cursor.execute(
+                "SELECT * FROM devices WHERE user_id = %s", (userId,)) #The , is necessary to make it a tuple
+            devices = cursor.fetchall()
+            for device in devices:
+                password = device[5]  # Get password from entry
+                print("Password:", decrypt_string(password))
+            return jsonify(devices)
+
+    except Error as e:
+        print("Error while connecting to MySQL", e)
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+            print("MySQL connection is closed")
+            return jsonify(devices)
+
+### ADD DEVICE TO DATABASE ###
+
+
+@app.route('/addDevice', methods=['POST'])
+@cross_origin(origin="*")
+def addDevice():
+    content_type = request.headers.get('Content-Type')
+    if (content_type == 'application/json'):
+        data = request.json
+        username = data.get('username')
+        password = data.get('password')
+        deviceId = data.get('deviceId')
+        userId = data.get('userId')
+        deviceAddress = data.get('deviceAddress')
+
+        print(data)
+    try:
+        connection = mysql.connector.connect(**db_config)
+        if connection.is_connected():
+            print("Connected to MySQL database")
+            cursor = connection.cursor()
+            cursor.execute("INSERT INTO devices (device_id,device_address, user_id, username, pass ) VALUES (%s, %s, %s, %s, %s)",
+                           (deviceId, deviceAddress, userId, username, encrypt_string(password)))
+            connection.commit()
+            return 'Device added successfully!'
+
+    except Error as e:
+        print("Error while connecting to MySQL", e)
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+            print("MySQL connection is closed")
+
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=env.get("PORT", 3000))
