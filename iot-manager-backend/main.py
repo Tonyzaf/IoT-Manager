@@ -17,6 +17,8 @@ CORS(app)
 
 load_dotenv()
 encrypt_key = os.getenv("encrypt_key")
+db_username = os.getenv("db_username")
+db_password = os.getenv("db_password")
 cipher_suite = Fernet(encrypt_key)
 
 port = 0
@@ -26,7 +28,7 @@ excluded_numbers = {22, 80}
 
 # Configure Database
 db_config = {'host': 'localhost', 'database': 'IOT_MANAGER',
-             'user': 'root', 'password': 'Ml4ke14x!'}
+             'user': db_username, 'password': db_password}
 
 
 def encrypt_string(plaintext):
@@ -146,7 +148,7 @@ def getUserDevices():
         if connection.is_connected():
             cursor = connection.cursor()
             cursor.execute(
-                "SELECT * FROM devices WHERE user_id = %s", (userId,)) #The , is necessary to make it a tuple
+                "SELECT * FROM devices WHERE user_id = %s", (userId,))  # The , is necessary to make it a tuple
             devices = cursor.fetchall()
             for device in devices:
                 password = device[5]  # Get password from entry

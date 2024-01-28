@@ -32,7 +32,7 @@ const addDeviceLanding = () => {
   const CallEndpoint = async () => {
     console.log("called");
     try {
-      const response = await axios.post(`http://localhost:5000/verify_device`, {
+      const response = await axios.post(`http://localhost:5000/verifyDevice`, {
         username: username,
         password: password,
       });
