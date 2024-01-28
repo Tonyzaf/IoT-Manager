@@ -1,12 +1,10 @@
 "use client";
 
 import { useEffect } from "react";
-import { useAuth0 } from "@auth0/auth0-react";
 import { useRouter } from "next/navigation";
 import App from "next/app";
 
 export default function Home() {
-  const { isAuthenticated, isLoading } = useAuth0();
   const router = useRouter();
 
   useEffect(() => {

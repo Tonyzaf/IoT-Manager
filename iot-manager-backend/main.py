@@ -50,8 +50,70 @@ def generate_random_number():
     # Choose one random number from the available numbers
     port = random.sample(available_numbers, 1)[0]
 
-### VERIFY DEVICE CREDENTIALS ###
+### REGISTER USER ###
 
+
+@app.route('/register', methods=['POST'])
+@cross_origin(origin="*")
+def register():
+    content_type = request.headers.get('Content-Type')
+    if (content_type == 'application/json'):
+        json = request.json
+        username = json.get('username')
+        password = json.get('password')
+        encyptedPass = encrypt_string(password)
+        try:
+            connection = mysql.connector.connect(**db_config)
+            if connection.is_connected():
+                print("Connected to MySQL database")
+                cursor = connection.cursor()
+                cursor.execute("INSERT INTO users (username, password) VALUES (%s, %s)",
+                               (username, encyptedPass))
+                connection.commit()
+                return 'User added successfully!'
+
+        except Error as e:
+            print("Error while connecting to MySQL", e)
+            # Return a 500 Internal Server Error status
+            return str(e), 500
+        finally:
+            if connection.is_connected():
+                cursor.close()
+                connection.close()
+                print("MySQL connection is closed")
+
+
+### LOGIN USER ###
+
+
+@app.route('/login', methods=['GET'])
+@cross_origin(origin="*")
+def login():
+    try:
+        connection = mysql.connector.connect(**db_config)
+        if connection.is_connected():
+            cursor = connection.cursor()
+            cursor.execute(
+                "SELECT password FROM users WHERE username = %s", (request.args.get('username'),))
+            entries = cursor.fetchall()
+            password = entries[0][0]
+            if (decrypt_string(password) == request.args.get('password')):
+                return "True"
+            else:
+                return "False"
+
+    except Error as e:
+        print("Error while connecting to MySQL", e)
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+            print("MySQL connection is closed")
+            result = (decrypt_string(password) == request.args.get('password'))
+            return jsonify(result)
+
+
+### VERIFY DEVICE CREDENTIALS ###
 
 @app.route('/verifyDevice', methods=['POST'])
 def verifyDevice():
@@ -82,9 +144,9 @@ def verifyDevice():
 ### FETCH CONNECTION CREDENTIALS TO DISPLAY ###
 
 
-@app.route('/get_connection_credentials', methods=['GET'])
+@app.route('/getCredentials', methods=['GET'])
 @cross_origin(origin="*")
-def get_connection_credentials():
+def getCredentials():
     try:
         generate_random_number()
         ipaddress = subprocess.run(
@@ -171,32 +233,35 @@ def getUserDevices():
 @cross_origin(origin="*")
 def addDevice():
     content_type = request.headers.get('Content-Type')
+    global port
     if (content_type == 'application/json'):
         data = request.json
         username = data.get('username')
         password = data.get('password')
         deviceId = data.get('deviceId')
         userId = data.get('userId')
-        deviceAddress = data.get('deviceAddress')
 
         print(data)
-    try:
-        connection = mysql.connector.connect(**db_config)
-        if connection.is_connected():
-            print("Connected to MySQL database")
-            cursor = connection.cursor()
-            cursor.execute("INSERT INTO devices (device_id,device_address, user_id, username, pass ) VALUES (%s, %s, %s, %s, %s)",
-                           (deviceId, deviceAddress, userId, username, encrypt_string(password)))
-            connection.commit()
-            return 'Device added successfully!'
 
-    except Error as e:
-        print("Error while connecting to MySQL", e)
-    finally:
-        if connection.is_connected():
-            cursor.close()
-            connection.close()
-            print("MySQL connection is closed")
+        encyptedPass = encrypt_string(password)
+
+        try:
+            connection = mysql.connector.connect(**db_config)
+            if connection.is_connected():
+                print("Connected to MySQL database")
+                cursor = connection.cursor()
+                cursor.execute("INSERT INTO devices (device_id, user_id, username, port, pass ) VALUES (%s, %s, %s, %s, %s)",
+                               (deviceId, userId, username, port, encyptedPass))
+                connection.commit()
+                return 'Device added successfully!'
+
+        except Error as e:
+            print("Error while connecting to MySQL", e)
+        finally:
+            if connection.is_connected():
+                cursor.close()
+                connection.close()
+                print("MySQL connection is closed")
 
 
 if __name__ == "__main__":

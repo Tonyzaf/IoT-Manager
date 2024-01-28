@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { useAuth0 } from "@auth0/auth0-react";
 import NavBar from "@/components/Navbar/Navbar";
 import Select from "react-select";
 import PlayerControls from "@/components/PlayerControls/PlayerControls";
@@ -58,7 +57,12 @@ function HomePage() {
       </div>
       <div className="Player-Controls">
         <h2>Select A File To Upload</h2>
-        <input id="file" type="file" accept=".mp3,.mp4" onChange={handleChange} />
+        <input
+          id="file"
+          type="file"
+          accept=".mp3,.mp4"
+          onChange={handleChange}
+        />
         <button className="Upload-Button">
           <h3>Upload</h3>
         </button>

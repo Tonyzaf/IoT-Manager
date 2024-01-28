@@ -1,12 +1,9 @@
 import React, { useState } from "react";
-import { useAuth0 } from "@auth0/auth0-react";
 import "./navbar.css";
 
 function NavBar({ setResult }) {
-  const { logout } = useAuth0();
-
   const openAddDeviceFlow = () => {
-    const url = '/addDeviceLanding';
+    const url = "/addDeviceLanding";
     const width = 800;
     const height = 600;
 
@@ -15,7 +12,11 @@ function NavBar({ setResult }) {
     const top = (window.innerHeight - height) / 2;
 
     // Use window.open to open a new window with custom dimensions and centered position
-    window.open(url, '_blank', `width=${width},height=${height},left=${left},top=${top}`);
+    window.open(
+      url,
+      "_blank",
+      `width=${width},height=${height},left=${left},top=${top}`
+    );
   };
 
   return (
@@ -25,9 +26,7 @@ function NavBar({ setResult }) {
         <li className="navbar-item" onClick={openAddDeviceFlow}>
           Add Device
         </li>
-        <li className="navbar-item" onClick={logout}>
-          Logout
-        </li>
+        <li className="navbar-item">Logout</li>
       </ul>
     </nav>
   );

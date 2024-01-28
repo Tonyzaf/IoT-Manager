@@ -7,6 +7,7 @@ import "../styles/addDeviceLanding.css";
 const addDeviceLanding = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [deviceName, setDeviceName] = useState("");
   const [credentials, setCredentials] = useState("");
   const [success, setSuccess] = useState(false);
   const [isButtonHovered, setIsButtonHovered] = useState(false);
@@ -18,9 +19,7 @@ const addDeviceLanding = () => {
 
   const getCredentials = async () => {
     try {
-      const response = await axios.get(
-        `http://localhost:5000/get_connection_credentials`
-      );
+      const response = await axios.get(`http://localhost:5000/getCredentials`);
       console.log(response.data);
       setCredentials(response.data);
     } catch (error) {
@@ -29,7 +28,7 @@ const addDeviceLanding = () => {
     }
   };
 
-  const CallEndpoint = async () => {
+  const CallEndpoints = async () => {
     console.log("called");
     try {
       const response = await axios.post(`http://localhost:5000/verifyDevice`, {
@@ -39,6 +38,11 @@ const addDeviceLanding = () => {
       console.log("response", response);
       // Handle the response here
       if (response.data === "True") {
+        const response = await axios.post(`http://localhost:5000/addDevice`, {
+          username: username,
+          password: password,
+          deviceName: deviceName,
+        });
         return true;
       } else {
         return false;
@@ -47,6 +51,8 @@ const addDeviceLanding = () => {
       // Handle errors
       console.error(error);
     }
+    // Reset the form after submission
+    clearFields();
   };
 
   const handleButtonHover = () => {
@@ -65,17 +71,25 @@ const addDeviceLanding = () => {
     setPassword(e.target.value);
   };
 
+  const handleDeviceNameChange = (e) => {
+    setDeviceName(e.target.value);
+  };
+
+  const clearFields = () => {
+    setUsername("");
+    setPassword("");
+    setDeviceName("");
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     // You can perform your login logic here with this.state.username and this.state.password
     // For example, you can make an API request to authenticate the user
     console.log("Username: ", username);
     console.log("Password: ", password);
-    const result = await CallEndpoint();
+    console.log("Device Name: ", deviceName);
+    const result = await CallEndpoints();
     console.log(result);
-    // Reset the form after submission
-    setUsername("");
-    setPassword("");
     Router.push({
       pathname: "/addDeviceResult",
       query: { result: result },
@@ -114,7 +128,7 @@ const addDeviceLanding = () => {
               onChange={handleUsernameChange}
             />
           </div>
-          <div>
+          <div className="usernameForm">
             <label htmlFor="password">Password: </label>
             <input
               type="password"
@@ -122,6 +136,16 @@ const addDeviceLanding = () => {
               name="password"
               value={password}
               onChange={handlePasswordChange}
+            />
+          </div>
+          <div>
+            <label htmlFor="deviceName">Device Name: </label>
+            <input
+              type="text"
+              id="deviceName"
+              name="deviceName"
+              value={deviceName}
+              onChange={handleDeviceNameChange}
             />
           </div>
           <div className="buttonRow">
@@ -132,7 +156,7 @@ const addDeviceLanding = () => {
               onMouseEnter={handleButtonHover}
               onMouseLeave={handleButtonLeave}
               type="submit"
-              onClick={CallEndpoint}
+              onClick={CallEndpoints}
             >
               Next
             </button>
