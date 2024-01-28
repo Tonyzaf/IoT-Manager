@@ -38,10 +38,12 @@ const addDeviceLanding = () => {
       console.log("response", response);
       // Handle the response here
       if (response.data === "True") {
+        console.log("Connected to device")
         const response = await axios.post(`http://localhost:5000/addDevice`, {
           username: username,
           password: password,
-          deviceName: deviceName,
+          deviceId: deviceName,
+          userId: "1",
         });
         return true;
       } else {

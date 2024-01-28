@@ -1,43 +1,14 @@
 import React, { useState } from "react";
 
-import "../styles/login.css";
+import "../styles/register.css";
 import axios from "axios";
 import Router from "next/router";
 
-function LoginPage() {
+function RegisterPage() {
   const [isButtonHovered, setIsButtonHovered] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(false);
-
-  const login = async (e) => {
-    e.preventDefault();
-    console.log("called");
-    try {
-      const response = await axios.get(
-        `http://localhost:5000/login?username=${username}&password=${password}`
-      );
-      console.log("response", response);
-      // Handle the response here
-      if (response.data === true) {
-        console.log("logged in");
-        clearFields();
-        Router.push("/home", { username: username });
-      } else {
-        clearFields();
-        setError(true);
-      }
-    } catch (error) {
-      // Handle errors
-      setError(true);
-      console.error(error);
-    }
-  };
-
-  const clearFields = () => {
-    setUsername("");
-    setPassword("");
-  };
 
   const handleButtonHover = () => {
     setIsButtonHovered(true);
@@ -55,19 +26,41 @@ function LoginPage() {
     setPassword(e.target.value);
   };
 
+  const register = async (e) => {
+    e.preventDefault();
+    console.log("called");
+    try {
+      const response = await axios.post(`http://localhost:5000/register`, {
+        username: username,
+        password: password,
+      });
+      console.log("response", response);
+      // Handle the response here
+      if (response.status === 200) {
+        console.log("Registered");
+        clearFields();
+        Router.push("/login");
+      }
+    } catch (error) {
+      // Handle errors
+      setError(true);
+      console.error(error);
+    }
+  };
+
+  const clearFields = () => {
+    setUsername("");
+    setPassword("");
+  };
+
   return (
     <div className="App">
       <header className="App-header">
-        <h1>Welcome to IoT-Manager</h1>
-        <p>
-          This project was developed as part of a Master's thesis for the
-          Department of Computer Engineering and Informatics of the University
-          of Patras.
-        </p>
+        <h1>Register to IoT-Manager</h1>
         <div className="formContainer">
-          <form onSubmit={login}>
+          <form onSubmit={register}>
             <div className="usernameForm">
-              <label htmlFor="username">Username:</label>
+              <label htmlFor="username">Username: </label>
               <input
                 type="text"
                 id="username"
@@ -95,7 +88,7 @@ function LoginPage() {
                 onMouseLeave={handleButtonLeave}
                 type="submit"
               >
-                Login
+                Register
               </button>
               {error && <p>An error has occured. Please try again</p>}
             </div>
@@ -106,4 +99,4 @@ function LoginPage() {
   );
 }
 
-export default LoginPage;
+export default RegisterPage;
