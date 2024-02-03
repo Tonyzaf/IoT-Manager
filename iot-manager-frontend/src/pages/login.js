@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import "../styles/login.css";
 import axios from "axios";
 import Router from "next/router";
+import { setSession } from "@/utilities/user";
 
 function LoginPage() {
   const [isButtonHovered, setIsButtonHovered] = useState(false);
@@ -19,10 +20,11 @@ function LoginPage() {
       );
       console.log("response", response);
       // Handle the response here
-      if (response.data === true) {
+      if (response.data) {
         console.log("logged in");
+        setSession(response.data);
         clearFields();
-        Router.push("/home", { username: username });
+        Router.push("/home");
       } else {
         clearFields();
         setError(true);

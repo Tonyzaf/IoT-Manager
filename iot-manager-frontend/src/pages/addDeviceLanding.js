@@ -3,6 +3,7 @@ import axios from "axios";
 import Router from "next/router";
 
 import "../styles/addDeviceLanding.css";
+import { getUserId } from "@/utilities/user";
 
 const addDeviceLanding = () => {
   const [username, setUsername] = useState("");
@@ -11,6 +12,7 @@ const addDeviceLanding = () => {
   const [credentials, setCredentials] = useState("");
   const [success, setSuccess] = useState(false);
   const [isButtonHovered, setIsButtonHovered] = useState(false);
+  const [error, setError] = useState();
 
   let headers = new Headers();
 
@@ -38,12 +40,12 @@ const addDeviceLanding = () => {
       console.log("response", response);
       // Handle the response here
       if (response.data === "True") {
-        console.log("Connected to device")
-        const response = await axios.post(`http://localhost:5000/addDevice`, {
+        console.log("Connected to device");
+        await axios.post(`http://localhost:5000/addDevice`, {
           username: username,
           password: password,
           deviceId: deviceName,
-          userId: "1",
+          userId: getUserId(),
         });
         return true;
       } else {
@@ -92,6 +94,10 @@ const addDeviceLanding = () => {
     console.log("Device Name: ", deviceName);
     const result = await CallEndpoints();
     console.log(result);
+    if (!result) {
+      setError("An Error Has Occured. Please Try Again.");
+      return;
+    }
     Router.push({
       pathname: "/addDeviceResult",
       query: { result: result },
@@ -158,11 +164,11 @@ const addDeviceLanding = () => {
               onMouseEnter={handleButtonHover}
               onMouseLeave={handleButtonLeave}
               type="submit"
-              onClick={CallEndpoints}
             >
               Next
             </button>
           </div>
+          {error && <p>{error}</p>}
         </form>
       </div>
     </div>

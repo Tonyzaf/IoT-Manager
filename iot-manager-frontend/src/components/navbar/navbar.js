@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import "./navbar.css";
+import { clearSession } from "@/utilities/user";
 
-function NavBar({ setResult }) {
+function NavBar() {
   const openAddDeviceFlow = () => {
     const url = "/addDeviceLanding";
     const width = 800;
@@ -26,7 +27,9 @@ function NavBar({ setResult }) {
         <li className="navbar-item" onClick={openAddDeviceFlow}>
           Add Device
         </li>
-        <li className="navbar-item">Logout</li>
+        <li className="navbar-item" onClick={clearSession}>
+          Logout
+        </li>
       </ul>
     </nav>
   );

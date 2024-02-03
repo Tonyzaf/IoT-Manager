@@ -95,12 +95,12 @@ def login():
             cursor = connection.cursor()
             cursor.execute(
                 "SELECT password FROM users WHERE username = %s", (request.args.get('username'),))
-            entries = cursor.fetchall()
-            password = entries[0][0]
-            if (decrypt_string(password) == request.args.get('password')):
-                return "True"
-            else:
-                return "False"
+            passEntries = cursor.fetchall()
+            password = passEntries[0][0]
+            cursor.execute(
+                "SELECT user_id FROM users WHERE username = %s", (request.args.get('username'),))
+            userIdEntries = cursor.fetchall()
+            userId = userIdEntries[0][0]
 
     except Error as e:
         print("Error while connecting to MySQL", e)
@@ -110,7 +110,10 @@ def login():
             connection.close()
             print("MySQL connection is closed")
             result = (decrypt_string(password) == request.args.get('password'))
-            return jsonify(result)
+            if (result == True):
+                return jsonify(userId)
+            else:
+                return jsonify(result)
 
 
 ### VERIFY DEVICE CREDENTIALS ###
@@ -205,17 +208,26 @@ def getUserDevices():
     userId = request.args.get('userId')
     print(userId)
     devices = []
+    formatted_devices = []  # Initialize the list outside the try block
+
     try:
         connection = mysql.connector.connect(**db_config)
         if connection.is_connected():
-            cursor = connection.cursor()
+            cursor = connection.cursor(dictionary=True)
             cursor.execute(
-                "SELECT * FROM devices WHERE user_id = %s", (userId,))  # The , is necessary to make it a tuple
+                "SELECT * FROM devices WHERE user_id = %s", (userId,))
             devices = cursor.fetchall()
+
             for device in devices:
-                password = device[5]  # Get password from entry
-                print("Password:", decrypt_string(password))
-            return jsonify(devices)
+                formatted_device = {
+                    'value': device['id'],
+                    'label': device['device_id'],
+                    'port': device['port']
+                    # 'userId': device['user_id'],
+                    # 'username': device['username'],
+                    # 'password': decrypt_string(device['pass']),
+                }
+                formatted_devices.append(formatted_device)
 
     except Error as e:
         print("Error while connecting to MySQL", e)
@@ -224,7 +236,9 @@ def getUserDevices():
             cursor.close()
             connection.close()
             print("MySQL connection is closed")
-            return jsonify(devices)
+
+    # Move the return statement outside of the finally block
+    return jsonify(formatted_devices)
 
 ### ADD DEVICE TO DATABASE ###
 
@@ -262,6 +276,30 @@ def addDevice():
                 cursor.close()
                 connection.close()
                 print("MySQL connection is closed")
+
+### REMOVE DEVICE FROM DATABASE ###
+
+
+@app.route('/removeDevice', methods=['DELETE'])
+@cross_origin(origin="*")
+def removeDevice():
+    deviceId = request.args.get('deviceId')
+    print(deviceId)
+    try:
+        connection = mysql.connector.connect(**db_config)
+        if connection.is_connected():
+            cursor = connection.cursor()
+            cursor.execute("DELETE FROM devices WHERE id = %s", (deviceId,))
+            connection.commit()
+            print('success')
+    except Error as e:
+        print("Error while connecting to MySQL", e)
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+            print("MySQL connection is closed")
+            return "Device Deleted Successfully"
 
 
 if __name__ == "__main__":

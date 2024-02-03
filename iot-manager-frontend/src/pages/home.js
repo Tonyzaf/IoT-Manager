@@ -1,15 +1,37 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import NavBar from "@/components/Navbar/Navbar";
 import Select from "react-select";
 import PlayerControls from "@/components/PlayerControls/PlayerControls";
 
 import "../styles/home.css";
+import { checkSession, getUserId } from "@/utilities/user";
+import axios from "axios";
 
 function HomePage() {
   const [isButtonHovered, setIsButtonHovered] = useState(false);
   const [result, setResult] = useState();
+  const [devices, setDevices] = useState([]);
   const [selectedDevices, setSelectedDevices] = useState([]);
   const [file, setFile] = useState(null);
+
+  useEffect(() => {
+    checkSession();
+    getUserDevices();
+  }, []);
+
+  const getUserDevices = async () => {
+    console.log("called");
+    const userId = getUserId();
+    try {
+      const response = await axios.get(
+        `http://localhost:5000/getUserDevices?userId=${userId}`
+      );
+      setDevices(response.data);
+    } catch (error) {
+      // Handle errors
+      console.error(error);
+    }
+  };
 
   const handleButtonHover = () => {
     setIsButtonHovered(true);
@@ -19,25 +41,11 @@ function HomePage() {
     setIsButtonHovered(false);
   };
 
-  const options = [
-    {
-      value: "device1",
-      label: "Raspberry Pi Zero W",
-    },
-    {
-      value: "device2",
-      label: "Raspberry Pi 4",
-    },
-    {
-      value: "device3",
-      label: "Macbook Pro",
-    },
-  ];
-
   function handleChange(event) {
     setFile(event.target.files[0]);
   }
 
+  console.log(devices);
   console.log(selectedDevices, file);
 
   return (
@@ -51,7 +59,7 @@ function HomePage() {
         <Select
           onChange={(values) => setSelectedDevices(values)}
           isMulti
-          options={options}
+          options={devices}
           placeholder="No Devices Selected..."
         />
       </div>
