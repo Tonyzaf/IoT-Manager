@@ -11,6 +11,8 @@ from flask import Flask
 from flask_cors import CORS, cross_origin
 from cryptography.fernet import Fernet
 from dotenv import load_dotenv
+from werkzeug.utils import secure_filename
+import json
 
 app = Flask(__name__)
 CORS(app)
@@ -300,6 +302,200 @@ def removeDevice():
             connection.close()
             print("MySQL connection is closed")
             return "Device Deleted Successfully"
+
+### SEND PLAY COMMAND ###
+
+
+@app.route('/play', methods=['POST'])
+@cross_origin(origin="*")
+def play():
+    connection = mysql.connector.connect(**db_config)
+    try:
+        data = request.json
+        deviceIds = data.get('deviceIds', [])
+        print('Device IDs:', deviceIds)
+
+        # Fetch devices from the database based on the provided IDs
+        with connection.cursor(dictionary=True) as cursor:
+            sql = f"SELECT id, port, username, pass FROM devices WHERE id IN ({', '.join(map(str, deviceIds))})"
+            cursor.execute(sql)
+            devices = cursor.fetchall()
+
+        # SSH Command
+        ssh_command = "mpc toggle"
+
+        # Send SSH command to each device
+        for device in devices:
+            # Replace 'your_ssh_username' and 'your_ssh_password' with your actual SSH credentials
+            ssh = paramiko.SSHClient()
+            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            ssh.connect(
+                'localhost',
+                port=device['port'],
+                username=device['username'],
+                password=decrypt_string(device['pass'])
+            )
+
+            # Run the command
+            stdin, stdout, stderr = ssh.exec_command(ssh_command)
+            print(stderr.read().decode('utf-8'))
+            print(stdout.read().decode('utf-8'), 'port', device['port'])
+
+            # Close the SSH connection
+            ssh.close()
+
+        return jsonify({"message": "SSH command sent successfully"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+### SEND NEXT COMMAND ###
+
+
+@app.route('/next', methods=['POST'])
+@cross_origin(origin="*")
+def next():
+    connection = mysql.connector.connect(**db_config)
+    try:
+        data = request.json
+        deviceIds = data.get('deviceIds', [])
+        print('Device IDs:', deviceIds)
+
+        # Fetch devices from the database based on the provided IDs
+        with connection.cursor(dictionary=True) as cursor:
+            sql = f"SELECT id, port, username, pass FROM devices WHERE id IN ({', '.join(map(str, deviceIds))})"
+            cursor.execute(sql)
+            devices = cursor.fetchall()
+
+        # SSH Command
+        ssh_command = "mpc next"
+        print(ssh_command)
+
+        # Send SSH command to each device
+        for device in devices:
+            # Replace 'your_ssh_username' and 'your_ssh_password' with your actual SSH credentials
+            ssh = paramiko.SSHClient()
+            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            ssh.connect(
+                'localhost',
+                port=device['port'],
+                username=device['username'],
+                password=decrypt_string(device['pass'])
+            )
+
+            # Run the command
+            stdin, stdout, stderr = ssh.exec_command(ssh_command)
+            print(stderr.read().decode('utf-8'))
+            print(stdout.read().decode('utf-8'), 'port', device['port'])
+
+            # Close the SSH connection
+            ssh.close()
+
+        return jsonify({"message": "SSH command sent successfully"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+### SEND PREVIOUS COMMAND ###
+
+
+@app.route('/prev', methods=['POST'])
+@cross_origin(origin="*")
+def prev():
+    connection = mysql.connector.connect(**db_config)
+    try:
+        data = request.json
+        deviceIds = data.get('deviceIds', [])
+        print('Device IDs:', deviceIds)
+
+        # Fetch devices from the database based on the provided IDs
+        with connection.cursor(dictionary=True) as cursor:
+            sql = f"SELECT id, port, username, pass FROM devices WHERE id IN ({', '.join(map(str, deviceIds))})"
+            cursor.execute(sql)
+            devices = cursor.fetchall()
+
+        # SSH Command
+        ssh_command = "mpc prev"
+        print(ssh_command)
+
+        # Send SSH command to each device
+        for device in devices:
+            # Replace 'your_ssh_username' and 'your_ssh_password' with your actual SSH credentials
+            ssh = paramiko.SSHClient()
+            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            ssh.connect(
+                'localhost',
+                port=device['port'],
+                username=device['username'],
+                password=decrypt_string(device['pass'])
+            )
+
+            # Run the command
+            stdin, stdout, stderr = ssh.exec_command(ssh_command)
+            print(stderr.read().decode('utf-8'))
+            print(stdout.read().decode('utf-8'), 'port', device['port'])
+
+            # Close the SSH connection
+            ssh.close()
+
+        return jsonify({"message": "SSH command sent successfully"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+### UPLOAD FILE ENDPOINT ###
+
+
+@app.route('/addTrack', methods=['POST'])
+@cross_origin(origin="*")
+def addTrack():
+    connection = mysql.connector.connect(**db_config)
+    try:
+        # Get the file from the request
+        file = request.files['file']
+        deviceIds_json = request.args.get('deviceIds')
+        deviceIds = [int(id) for id in deviceIds_json.split(',')]
+        print('Device IDs:', deviceIds)
+
+        # Securely save the file to a temporary location
+        filename = secure_filename(file.filename)
+        file.save(filename)
+
+        # Fetch devices from the database based on the provided IDs
+        with connection.cursor(dictionary=True) as cursor:
+            sql = f"SELECT id, port, username, pass FROM devices WHERE id IN ({', '.join(map(str, deviceIds))})"
+            cursor.execute(sql)
+            devices = cursor.fetchall()
+            print(devices)
+
+        # Send SSH command to each device
+        for device in devices:
+            # Replace 'your_ssh_username' and 'your_ssh_password' with your actual SSH credentials
+            ssh = paramiko.SSHClient()
+            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            ssh.connect(
+                'localhost',
+                port=device['port'],
+                username=device['username'],
+                password=decrypt_string(device['pass'])
+            )
+            username = device['username']
+
+            # SFTP the file to the device
+            with ssh.open_sftp() as sftp:
+                # Change the path as needed
+                sftp.put(filename, f'/home/{username}/Music/{filename}')
+
+            # Add the file to the MPC queue
+            stdin, stdout, stderr = ssh.exec_command(
+                f'mpc add /home/{username}/Music/{filename}')  # Change the path as needed
+
+            print(stderr.read().decode('utf-8'))
+            print(stdout.read().decode('utf-8'), 'port', device['port'])
+
+            # Close the SSH connection
+            ssh.close()
+
+        return jsonify({"message": "File uploaded successfully"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 if __name__ == "__main__":

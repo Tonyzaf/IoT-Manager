@@ -99,6 +99,7 @@ function LoginPage() {
               >
                 Login
               </button>
+              <p onClick={() => Router.push("/register")}>Register</p>
               {error && <p>An error has occured. Please try again</p>}
             </div>
           </form>

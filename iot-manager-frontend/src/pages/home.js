@@ -45,8 +45,29 @@ function HomePage() {
     setFile(event.target.files[0]);
   }
 
-  console.log(devices);
-  console.log(selectedDevices, file);
+  const handleFileUpload = async () => {
+    const formData = new FormData();
+    const deviceIds = selectedDevices?.map((device) => device.value);
+    formData.append("file", file);
+    console.log("ids", deviceIds);
+    console.log("form", formData);
+
+    try {
+      const response = await axios.post(
+        `http://localhost:5000/addTrack?deviceIds=${deviceIds.join(",")}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      console.log(response?.data);
+    } catch (error) {
+      // Handle errors
+      console.error(error);
+    }
+  };
 
   return (
     <div className="App">
@@ -71,10 +92,10 @@ function HomePage() {
           accept=".mp3,.mp4"
           onChange={handleChange}
         />
-        <button className="Upload-Button">
+        <button className="Upload-Button" onClick={handleFileUpload}>
           <h3>Upload</h3>
         </button>
-        <PlayerControls />
+        <PlayerControls selectedDevices={selectedDevices} />
       </div>
     </div>
   );
