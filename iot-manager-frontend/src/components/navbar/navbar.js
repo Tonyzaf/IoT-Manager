@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "./navbar.css";
 import { clearSession } from "@/utilities/user";
+import Router from "next/router";
 
 function NavBar() {
   const openAddDeviceFlow = () => {
@@ -20,12 +21,25 @@ function NavBar() {
     );
   };
 
+  const goToDevices = () => {
+    Router.push("/devices");
+  };
+
+  const goToHome = () => {
+    Router.push("/home");
+  };
+
   return (
     <nav className="navbar">
       <ul className="navbar-list">
-        <li className="navbar-item">Home</li>
+        <li className="navbar-item" onClick={goToHome}>
+          Home
+        </li>
         <li className="navbar-item" onClick={openAddDeviceFlow}>
           Add Device
+        </li>
+        <li className="navbar-item" onClick={goToDevices}>
+          Manage Devices
         </li>
         <li className="navbar-item" onClick={clearSession}>
           Logout
