@@ -17,13 +17,3 @@
 	<li>Run `npx next dev` to start the Node server.</li>
 	<li>The website is now running on `localhost:3000`</li>
 </ul>
-
-
-<h2>Frontend Usage Instructions:</h2>
-<ul>
-	<li>Log In to the app using Auth0 (Either with username/password combo or directly via Google)</li>
-	<li>Select `Add Device` from the NavBar</li>
-	<li>Follow the on-screen instructions to register your device with the server</li>
-	<li>If the device is connected, you will see a prompt and it will show up in your devices dropdown.</li>
-	<li>If it fails you will be prompted to try again.</li>
-</ul>
