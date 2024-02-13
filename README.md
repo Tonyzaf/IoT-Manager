@@ -1,4 +1,4 @@
-<h2>This platform was developed as part of the Master's Thesis of Antonios Zafeirelis for the Computer Engineering and Informatics Department of the University of Patras</h2>
+<h2>This platform was developed as part of Diploma Thesis for the Computer Engineering and Informatics Department of the University of Patras, under the supervision of Professor Kyriakos Vlachos.</h2>
 
 <h2>Backend Installation Instructions:</h2>
 <ul>
