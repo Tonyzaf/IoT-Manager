@@ -26,6 +26,7 @@ function HomePage() {
       const response = await axios.get(
         `http://localhost:5000/getUserDevices?userId=${userId}`
       );
+      console.log(response.data)
       setDevices(response.data);
     } catch (error) {
       // Handle errors
@@ -85,11 +86,11 @@ function HomePage() {
         />
       </div>
       <div className="Player-Controls">
-        <h2>Select A File To Upload</h2>
+        <h2>Select A File Or Playlist To Upload</h2>
         <input
           id="file"
           type="file"
-          accept=".mp3,.mp4"
+          accept=".mp3,.m3u"
           onChange={handleChange}
         />
         <button className="Upload-Button" onClick={handleFileUpload}>

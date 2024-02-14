@@ -27,6 +27,23 @@ export const PlayerControls = ({ selectedDevices }) => {
     }
   };
 
+  const pause = async () => {
+    const deviceIds = selectedDevices?.map((device) => device.value);
+    console.log(deviceIds);
+    if (deviceIds.length > 0) {
+      try {
+        const response = await axios.post(`http://localhost:5000/pause`, {
+          deviceIds: deviceIds,
+        });
+        console.log(response?.data);
+        setIsPlaying(!isPlaying);
+      } catch (error) {
+        // Handle errors
+        console.error(error);
+      }
+    }
+  };
+
   const next = async () => {
     const deviceIds = selectedDevices?.map((device) => device.value);
     console.log(deviceIds);
@@ -71,7 +88,7 @@ export const PlayerControls = ({ selectedDevices }) => {
       <Image
         src={isPlaying ? PauseButton : PlayButton}
         className="Play-Pause-Button"
-        onClick={play}
+        onClick={isPlaying ? pause : play}
         height={96}
       />
       <Image src={ForwardButton} alt="Next Button" height={96} onClick={next} />

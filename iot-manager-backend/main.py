@@ -221,15 +221,35 @@ def getUserDevices():
             devices = cursor.fetchall()
 
             for device in devices:
+                try:
+                    ssh = paramiko.SSHClient()
+                    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+                    ssh.connect(
+                        'localhost',
+                        port=device['port'],
+                        username=device['username'],
+                        password=decrypt_string(device['pass'])
+                    )
+
+                    # Run the command
+                    stdin, stdout, stderr = ssh.exec_command('mpc')
+                    status = stdout.read().decode('utf-8')
+                    # Close the SSH connection
+                    ssh.close()
+                except:
+                    print('exception')
+                    status = "Offline"
+
                 formatted_device = {
                     'value': device['id'],
                     'label': device['device_id'],
-                    'port': device['port']
+                    'port': device['port'],
+                    'status': status
                     # 'userId': device['user_id'],
                     # 'username': device['username'],
                     # 'password': decrypt_string(device['pass']),
                 }
-                formatted_devices.append(formatted_device)
+            formatted_devices.append(formatted_device)
 
     except Error as e:
         print("Error while connecting to MySQL", e)
@@ -322,7 +342,51 @@ def play():
             devices = cursor.fetchall()
 
         # SSH Command
-        ssh_command = "mpc toggle"
+        ssh_command = "mpc play"
+
+        # Send SSH command to each device
+        for device in devices:
+            # Replace 'your_ssh_username' and 'your_ssh_password' with your actual SSH credentials
+            ssh = paramiko.SSHClient()
+            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            ssh.connect(
+                'localhost',
+                port=device['port'],
+                username=device['username'],
+                password=decrypt_string(device['pass'])
+            )
+
+            # Run the command
+            stdin, stdout, stderr = ssh.exec_command(ssh_command)
+            print(stderr.read().decode('utf-8'))
+            print(stdout.read().decode('utf-8'), 'port', device['port'])
+
+            # Close the SSH connection
+            ssh.close()
+
+        return jsonify({"message": "SSH command sent successfully"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+### SEND PAUSE COMMAND ###
+    
+@app.route('/pause', methods=['POST'])
+@cross_origin(origin="*")
+def pause():
+    connection = mysql.connector.connect(**db_config)
+    try:
+        data = request.json
+        deviceIds = data.get('deviceIds', [])
+        print('Device IDs:', deviceIds)
+
+        # Fetch devices from the database based on the provided IDs
+        with connection.cursor(dictionary=True) as cursor:
+            sql = f"SELECT id, port, username, pass FROM devices WHERE id IN ({', '.join(map(str, deviceIds))})"
+            cursor.execute(sql)
+            devices = cursor.fetchall()
+
+        # SSH Command
+        ssh_command = "mpc pause-if-playing"
 
         # Send SSH command to each device
         for device in devices:
@@ -457,6 +521,8 @@ def addTrack():
         # Securely save the file to a temporary location
         filename = secure_filename(file.filename)
         file.save(filename)
+        file_extension = filename.split('.')[-1]
+        print('File extension:', file_extension)
 
         # Fetch devices from the database based on the provided IDs
         with connection.cursor(dictionary=True) as cursor:
@@ -485,7 +551,13 @@ def addTrack():
 
             # Add the file to the MPC queue
             stdin, stdout, stderr = ssh.exec_command(
-                f'mpc add /home/{username}/Music/{filename}')  # Change the path as needed
+                f'mpc update')
+            if file_extension == 'm3u':
+                stdin, stdout, stderr = ssh.exec_command(
+                    f'mpc load {filename}')
+            else:
+                stdin, stdout, stderr = ssh.exec_command(
+                    f'mpc add {filename}')
 
             print(stderr.read().decode('utf-8'))
             print(stdout.read().decode('utf-8'), 'port', device['port'])

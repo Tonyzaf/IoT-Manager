@@ -11,6 +11,7 @@ import Image from "next/image";
 
 function Devices() {
   const [devices, setDevices] = useState([]);
+  const statusRegex = /\[(.*?)\]/;
 
   useEffect(() => {
     checkSession();
@@ -43,10 +44,11 @@ function Devices() {
       });
   };
 
-  const DeviceItem = ({ name, id, port }) => (
+  const DeviceItem = ({ name, id, port, status }) => (
     <div className="device-container">
       <p>{name}</p>
       <p>Port = {port}</p>
+      <p>{status === "Offline" ? "Offline" : status.match(statusRegex)[1]}</p>
       <Image
         src={DeleteIcon}
         height={16}
@@ -70,6 +72,7 @@ function Devices() {
             name={device.label}
             id={device.value}
             port={device.port}
+            status={device.status}
           />
         ))}
       </div>
