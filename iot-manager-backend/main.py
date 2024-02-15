@@ -29,7 +29,7 @@ port = 0
 excluded_numbers = {22, 80}
 
 # Configure Database
-db_config = {'host': 'localhost', 'database': 'IOT_MANAGER',
+db_config = {'host': 'localhost', 'database': 'iot_mgr',
              'user': db_username, 'password': db_password}
 
 
@@ -323,6 +323,137 @@ def removeDevice():
             print("MySQL connection is closed")
             return "Device Deleted Successfully"
 
+
+### ADD DEVICE TO GROUP ###
+
+
+@app.route('/addToGroup', methods=['POST'])
+@cross_origin(origin="*")
+def addToGroup():
+    content_type = request.headers.get('Content-Type')
+    global port
+    if (content_type == 'application/json'):
+        data = request.json
+        deviceId = data.get('deviceId')
+        userId = data.get('userId')
+        groupName = data.get('groupName')
+
+        print(data)
+
+        try:
+            connection = mysql.connector.connect(**db_config)
+            if connection.is_connected():
+                print("Connected to MySQL database")
+                cursor = connection.cursor()
+                cursor.execute("INSERT INTO deviceGroups (groupName, device_id, user_id ) VALUES (%s, %s, %s)",
+                               (groupName, deviceId, userId))
+                connection.commit()
+                return 'Device added successfully!'
+
+        except Error as e:
+            print("Error while connecting to MySQL", e)
+        finally:
+            if connection.is_connected():
+                cursor.close()
+                connection.close()
+                print("MySQL connection is closed")
+
+### FETCH USER GROUPS ###
+
+
+@app.route('/getUserGroups', methods=['GET'])
+def getGroups():
+    try:
+        connection = mysql.connector.connect(**db_config)
+        user_id = request.args.get('userId')
+        cur = connection.cursor()
+        cur.execute(
+            "SELECT group_id, groupName FROM deviceGroups WHERE user_id = %s", (user_id,))
+        groups = cur.fetchall()
+
+        group_list = []
+        for group in groups:
+            group_data = {
+                'groupId': group[0],
+                'groupName': group[1],
+                'devices': []
+            }
+
+            # Fetch device IDs associated with the current user
+            cur.execute(
+                "SELECT device_id FROM devices WHERE user_id = %s", (user_id,))
+            device_ids = [device[0] for device in cur.fetchall()]
+
+            # Fetch device details based on device IDs
+            for device_id in device_ids:
+                cur.execute(
+                    "SELECT device_id, username, pass, port FROM devices WHERE device_id = %s", (device_id,))
+                device_details = cur.fetchone()
+
+                device_data = {
+                    'groupId': group_data['groupId'],
+                    'deviceId': device_details[0],
+                    'username': device_details[1],
+                    'password': device_details[2],
+                    'port': device_details[3]
+                }
+                group_data['devices'].append(device_data)
+
+            group_list.append(group_data)
+
+        return jsonify(group_list)
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+### DELETE GROUP ###
+
+
+@app.route('/deleteDeviceGroup', methods=['DELETE'])
+@cross_origin(origin="*")
+def deleteDeviceGroup():
+    groupName = request.args.get('groupName')
+    try:
+        connection = mysql.connector.connect(**db_config)
+        if connection.is_connected():
+            cursor = connection.cursor()
+            cursor.execute(
+                "DELETE FROM deviceGroups WHERE groupName = %s", (groupName,))
+            connection.commit()
+            print('success')
+    except Error as e:
+        print("Error while connecting to MySQL", e)
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+            print("MySQL connection is closed")
+            return "Group Deleted Successfully"
+
+### DELETE GROUP ###
+
+
+@app.route('/removeDeviceFromGroup', methods=['DELETE'])
+@cross_origin(origin="*")
+def removeDeviceFromGroup():
+    groupId = request.args.get('groupId')
+    try:
+        connection = mysql.connector.connect(**db_config)
+        if connection.is_connected():
+            cursor = connection.cursor()
+            cursor.execute(
+                "DELETE FROM deviceGroups WHERE group_id = %s", (groupId,))
+            connection.commit()
+            print('success')
+    except Error as e:
+        print("Error while connecting to MySQL", e)
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+            print("MySQL connection is closed")
+            return "Device Deleted Successfully"
+
 ### SEND PLAY COMMAND ###
 
 
@@ -367,9 +498,10 @@ def play():
         return jsonify({"message": "SSH command sent successfully"})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    
+
 ### SEND PAUSE COMMAND ###
-    
+
+
 @app.route('/pause', methods=['POST'])
 @cross_origin(origin="*")
 def pause():

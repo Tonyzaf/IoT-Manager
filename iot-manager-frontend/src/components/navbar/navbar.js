@@ -29,6 +29,10 @@ function NavBar() {
     Router.push("/home");
   };
 
+  const goToGroups = () => {
+    Router.push("/groups");
+  };
+
   return (
     <nav className="navbar">
       <ul className="navbar-list">
@@ -40,6 +44,9 @@ function NavBar() {
         </li>
         <li className="navbar-item" onClick={goToDevices}>
           Manage Devices
+        </li>
+        <li className="navbar-item" onClick={goToGroups}>
+          Device Groups
         </li>
         <li className="navbar-item" onClick={clearSession}>
           Logout

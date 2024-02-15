@@ -52,7 +52,7 @@ function HomePage() {
     formData.append("file", file);
     console.log("ids", deviceIds);
     console.log("form", formData);
-
+  
     try {
       const response = await axios.post(
         `http://localhost:5000/addTrack?deviceIds=${deviceIds.join(",")}`,
@@ -64,6 +64,11 @@ function HomePage() {
         }
       );
       console.log(response?.data);
+  
+      // Reset file input
+      document.getElementById("file").value = null;
+      setFile(null); // Also reset file state
+  
     } catch (error) {
       // Handle errors
       console.error(error);

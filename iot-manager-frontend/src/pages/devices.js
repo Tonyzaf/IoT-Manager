@@ -44,19 +44,28 @@ function Devices() {
       });
   };
 
-  const DeviceItem = ({ name, id, port, status }) => (
-    <div className="device-container">
-      <p>{name}</p>
-      <p>Port = {port}</p>
-      <p>{status === "Offline" ? "Offline" : status.match(statusRegex)[1]}</p>
-      <Image
-        src={DeleteIcon}
-        height={16}
-        alt="delete"
-        onClick={() => removeDevice(id)}
-      />
-    </div>
-  );
+  const DeviceItem = ({ name, id, port, status }) => {
+    console.log(status);
+    var displayedStatus = status;
+    if (status.match(statusRegex)) {
+      displayedStatus = status.match(statusRegex)[1];
+    } else if (status != "Offline") {
+      displayedStatus = "Online";
+    }
+    return (
+      <div className="device-container">
+        <p>{name}</p>
+        <p>Port = {port}</p>
+        <p>{displayedStatus}</p>
+        <Image
+          src={DeleteIcon}
+          height={16}
+          alt="delete"
+          onClick={() => removeDevice(id)}
+        />
+      </div>
+    );
+  };
 
   console.log(devices);
 
