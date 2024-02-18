@@ -12,6 +12,9 @@ import Image from "next/image";
 function DeviceGroups() {
   const [devices, setDevices] = useState([]);
   const [deviceGroups, setDeviceGroups] = useState([]);
+  const [selectedDevices, setSelectedDevices] = useState([]);
+  const [expanded, setExpanded] = useState(false);
+  const [name, setName] = useState("");
   const statusRegex = /\[(.*?)\]/;
 
   useEffect(() => {
@@ -91,6 +94,34 @@ function DeviceGroups() {
       });
   };
 
+  const createDeviceGroup = async () => {
+    const deviceIds = selectedDevices?.map((device) => device.value);
+    console.log(deviceIds);
+    if (deviceIds.length > 0 && name) {
+      for (const device of deviceIds) {
+        try {
+          const response = await axios.post(
+            `http://localhost:5000/addToGroup`,
+            {
+              deviceId: device,
+              groupName: name,
+              userId: getUserId(),
+            }
+          );
+          console.log(response?.data);
+        } catch (error) {
+          // Handle errors
+          console.error(error);
+        }
+      }
+
+      setName("");
+      setDevices([]);
+      setExpanded(false);
+      getUserGroups();
+    }
+  };
+
   const DeviceGroupItem = (group) => {
     let expanded = false; // Call the hook unconditionally
 
@@ -139,7 +170,7 @@ function DeviceGroups() {
     });
   };
 
-  console.log(devices, deviceGroups);
+  console.log(name);
 
   return (
     <div className="App">
@@ -148,6 +179,27 @@ function DeviceGroups() {
         <h1>Manage Your Device Groups</h1>
       </header>
       <div className="device-list-container">{renderDeviceGroups()}</div>
+      <div className="Create-Group-Widget">
+        <h2 onClick={() => setExpanded(!expanded)}>Create a Device Group</h2>
+        {expanded && (
+          <>
+            <p>Group Name</p>
+            <input
+              className="Group-Name-Input"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            ></input>
+            <Select
+              className="Group-Name-Input"
+              onChange={(values) => setSelectedDevices(values)}
+              isMulti
+              options={devices}
+              placeholder="No Devices Selected..."
+            />
+            <button onClick={createDeviceGroup}>Create Group</button>
+          </>
+        )}
+      </div>
     </div>
   );
 }

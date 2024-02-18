@@ -383,8 +383,9 @@ def getGroups():
         user_id = request.args.get('userId')
         cur = connection.cursor()
         cur.execute(
-            "SELECT group_id, groupName FROM deviceGroups WHERE user_id = %s", (user_id,))
+            "SELECT group_id, groupName, device_id FROM deviceGroups WHERE user_id = %s", (user_id,))
         groups = cur.fetchall()
+        print(groups)
 
         group_list = []
         for group in groups:
@@ -394,17 +395,13 @@ def getGroups():
                 'devices': []
             }
 
-            # Fetch device IDs associated with the current user
+            # Fetch devices associated with the current group
             cur.execute(
-                "SELECT device_id FROM devices WHERE user_id = %s", (user_id,))
-            device_ids = [device[0] for device in cur.fetchall()]
+                "SELECT device_id, username, pass, port FROM devices WHERE user_id = %s AND id = %s", (user_id, group[2]))
+            group_devices = cur.fetchall()
 
-            # Fetch device details based on device IDs
-            for device_id in device_ids:
-                cur.execute(
-                    "SELECT device_id, username, pass, port FROM devices WHERE device_id = %s", (device_id,))
-                device_details = cur.fetchone()
-
+            # Process each device in the group
+            for device_details in group_devices:
                 device_data = {
                     'groupId': group_data['groupId'],
                     'deviceId': device_details[0],
