@@ -26,7 +26,7 @@ function HomePage() {
       const response = await axios.get(
         `http://localhost:5000/getUserDevices?userId=${userId}`
       );
-      console.log(response.data)
+      console.log(response.data);
       setDevices(response.data);
     } catch (error) {
       // Handle errors
@@ -52,7 +52,7 @@ function HomePage() {
     formData.append("file", file);
     console.log("ids", deviceIds);
     console.log("form", formData);
-  
+
     try {
       const response = await axios.post(
         `http://localhost:5000/addTrack?deviceIds=${deviceIds.join(",")}`,
@@ -64,11 +64,10 @@ function HomePage() {
         }
       );
       console.log(response?.data);
-  
+
       // Reset file input
       document.getElementById("file").value = null;
       setFile(null); // Also reset file state
-  
     } catch (error) {
       // Handle errors
       console.error(error);
@@ -86,7 +85,7 @@ function HomePage() {
         <Select
           onChange={(values) => setSelectedDevices(values)}
           isMulti
-          options={devices}
+          options={devices.filter((device) => device.status != "Offline")}
           placeholder="No Devices Selected..."
         />
       </div>

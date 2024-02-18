@@ -46,6 +46,20 @@ def decrypt_string(ciphertext):
 
 
 def generate_random_number():
+    try:
+        connection = mysql.connector.connect(**db_config)
+        if connection.is_connected():
+            cursor = connection.cursor()
+            cursor.execute(
+                "SELECT port FROM devices")
+            entries = cursor.fetchall()
+            for entry in entries:
+                print(entry[0])
+                excluded_numbers.add(entry[0])
+                print(excluded_numbers)
+
+    except Error as e:
+        print("Error while connecting to MySQL", e)
     global port
     # Create a set of available numbers by subtracting excluded_numbers from all possible numbers
     available_numbers = set(range(1, 10000)) - excluded_numbers
@@ -210,7 +224,7 @@ def getUserDevices():
     userId = request.args.get('userId')
     print(userId)
     devices = []
-    formatted_devices = []  # Initialize the list outside the try block
+    formatted_devices = []
 
     try:
         connection = mysql.connector.connect(**db_config)
@@ -219,6 +233,7 @@ def getUserDevices():
             cursor.execute(
                 "SELECT * FROM devices WHERE user_id = %s", (userId,))
             devices = cursor.fetchall()
+            print(devices)
 
             for device in devices:
                 try:
@@ -236,8 +251,9 @@ def getUserDevices():
                     status = stdout.read().decode('utf-8')
                     # Close the SSH connection
                     ssh.close()
-                except:
-                    print('exception')
+                    print(device)
+                except Exception as e:
+                    print('Exception:', e)
                     status = "Offline"
 
                 formatted_device = {
@@ -245,11 +261,11 @@ def getUserDevices():
                     'label': device['device_id'],
                     'port': device['port'],
                     'status': status
-                    # 'userId': device['user_id'],
-                    # 'username': device['username'],
-                    # 'password': decrypt_string(device['pass']),
                 }
-            formatted_devices.append(formatted_device)
+                # Move this inside the loop
+                formatted_devices.append(formatted_device)
+
+            print(formatted_devices)
 
     except Error as e:
         print("Error while connecting to MySQL", e)
@@ -259,7 +275,6 @@ def getUserDevices():
             connection.close()
             print("MySQL connection is closed")
 
-    # Move the return statement outside of the finally block
     return jsonify(formatted_devices)
 
 ### ADD DEVICE TO DATABASE ###
