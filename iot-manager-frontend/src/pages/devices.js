@@ -11,7 +11,6 @@ import Image from "next/image";
 
 function Devices() {
   const [devices, setDevices] = useState([]);
-  const statusRegex = /\[(.*?)\]/;
 
   useEffect(() => {
     checkSession();
@@ -47,8 +46,10 @@ function Devices() {
   const DeviceItem = ({ name, id, port, status }) => {
     console.log(status);
     var displayedStatus = status;
-    if (status.match(statusRegex)) {
-      displayedStatus = status.match(statusRegex)[1];
+    if (status.includes("playing")) {
+      displayedStatus = "Playing";
+    } else if (status.includes("paused")) {
+      displayedStatus = "Paused";
     } else if (status != "Offline") {
       displayedStatus = "Online";
     }

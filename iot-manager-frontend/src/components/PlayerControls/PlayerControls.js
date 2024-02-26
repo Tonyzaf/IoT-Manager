@@ -7,9 +7,11 @@ import BackwardButton from "../../assets/BackwardButton.png";
 import Image from "next/image";
 import axios from "axios";
 
-export const PlayerControls = ({ selectedDevices }) => {
-  const [isPlaying, setIsPlaying] = useState(false);
-
+export const PlayerControls = ({
+  selectedDevices,
+  isPlaying,
+  setIsPlaying,
+}) => {
   const play = async () => {
     const deviceIds = selectedDevices?.map((device) => device.value);
     console.log(deviceIds);

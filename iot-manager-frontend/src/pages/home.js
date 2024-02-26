@@ -11,13 +11,57 @@ function HomePage() {
   const [isButtonHovered, setIsButtonHovered] = useState(false);
   const [result, setResult] = useState();
   const [devices, setDevices] = useState([]);
+  const [displayedDevices, setDisplayedDevices] = useState([]);
   const [selectedDevices, setSelectedDevices] = useState([]);
   const [file, setFile] = useState(null);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
     checkSession();
     getUserDevices();
   }, []);
+
+  useEffect(() => {
+    if (devices.length > 0) {
+      getUserGroups();
+    }
+  }, [devices]);
+
+  const mergeDeviceGroups = (objects) => {
+    const mergedObjects = {};
+
+    objects.forEach((obj) => {
+      const groupName = obj.groupName;
+
+      if (!mergedObjects[groupName]) {
+        mergedObjects[groupName] = { ...obj, label: groupName };
+      } else {
+        mergedObjects[groupName].devices = [
+          ...mergedObjects[groupName].devices,
+          ...obj.devices,
+        ];
+      }
+    });
+
+    return Object.values(mergedObjects);
+  };
+
+  const getUserGroups = async () => {
+    console.log("called");
+    const userId = getUserId();
+    try {
+      const response = await axios.get(
+        `http://localhost:5000/getUserGroups?userId=${userId}`
+      );
+      setDisplayedDevices((previousValue) => [
+        ...devices,
+        ...mergeDeviceGroups(response.data),
+      ]);
+    } catch (error) {
+      // Handle errors
+      console.error(error);
+    }
+  };
 
   const getUserDevices = async () => {
     console.log("called");
@@ -74,6 +118,40 @@ function HomePage() {
     }
   };
 
+  const handleDeviceSelection = (values) => {
+    var selectedDevices = [];
+    function hasDevices(obj) {
+      return obj.hasOwnProperty("devices") && Array.isArray(obj.devices);
+    }
+    if (values.length > 0) {
+      selectedDevices = [];
+      values.forEach((obj) => {
+        if (hasDevices(obj)) {
+          obj.devices.forEach((device) => {
+            const deviceToAdd = devices.find(
+              (d) => d.label === device.deviceId
+            );
+            if (selectedDevices) selectedDevices.push(deviceToAdd);
+          });
+        } else {
+          selectedDevices.push(obj);
+        }
+      });
+      setSelectedDevices(selectedDevices);
+    }
+    if (
+      selectedDevices.find((device) => {
+        if (device.status.includes("playing")) {
+          return true;
+        } else return false;
+      })
+    ) {
+      setIsPlaying(true);
+    } else {
+      setIsPlaying(false);
+    }
+  };
+
   return (
     <div className="App">
       <NavBar setResult={setResult} /> {/* Render the NavBar component */}
@@ -83,9 +161,10 @@ function HomePage() {
       <div className="Device-Selector">
         <h2>Select Devices</h2>
         <Select
-          onChange={(values) => setSelectedDevices(values)}
+          onChange={(values) => handleDeviceSelection(values)}
           isMulti
-          options={devices.filter((device) => device.status != "Offline")}
+          // options={devices.filter((device) => device.status != "Offline")}
+          options={displayedDevices}
           placeholder="No Devices Selected..."
         />
       </div>
@@ -100,7 +179,11 @@ function HomePage() {
         <button className="Upload-Button" onClick={handleFileUpload}>
           <h3>Upload</h3>
         </button>
-        <PlayerControls selectedDevices={selectedDevices} />
+        <PlayerControls
+          selectedDevices={selectedDevices}
+          isPlaying={isPlaying}
+          setIsPlaying={setIsPlaying}
+        />
       </div>
     </div>
   );
